@@ -1,0 +1,12 @@
+[Unit]
+Description=My Script Service
+After=multi-user.target
+
+[Service]
+Type=idle
+WorkingDirectory=/home/jon/carena-controller/
+Environment="PATH=/home/jon/@carena-controller/bin"
+ExecStart=/home/jon/@carena-controller/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 wsgi:app
+
+[Install]
+WantedBy=multi-user.target

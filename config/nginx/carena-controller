@@ -1,0 +1,53 @@
+server {
+    #HTTPS Configuration
+    listen 443 ssl http2 default_server;
+    listen [::]:443 ssl http2 default_server;
+
+
+    #HTTP Configuration
+
+    ssl off;
+    server_name carena.ca;
+    ssl_certificate /etc/nginx/ssl/fullchain.pem; 
+    ssl_certificate_key /etc/nginx/ssl/privkey.pem; 
+
+    error_log /var/log/nginx/carena.log debug;
+    
+     location / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_pass http://127.0.0.1:8000/;
+    }
+    location ~ /.well-known {
+        allow all;
+    }
+    location /static/ {
+       alias /home/jon/carena-controller/static/;
+    }
+
+
+
+}
+server {
+#    if ($host = carena.ca) {
+#        return 301 https://$host$request_uri;
+#    } # managed by Certbot
+
+
+    listen 80;
+    listen [::]:80;
+    server_name carena.ca;
+#    return 404; # managed by Certbot
+
+    location / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_pass http://127.0.0.1:5000/;
+    }
+
+
+}
