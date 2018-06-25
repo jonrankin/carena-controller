@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="keywords" content="minecraft, carena, world status, controller"/>
+<meta name="description" content="World of Carena, Feed the Beast 1.7.10 Minecraft Server"/>
+<title>Carena Minecraft Server</title>
+
+<link rel='stylesheet' href='static/controller.css' />
+
+<script
+   src="https://code.jquery.com/jquery-3.2.1.min.js"
+   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+   crossorigin="anonymous"></script>
+
+<script 
+   type="text/javascript" 
+   src="https://www.gstatic.com/charts/loader.js"></script>
+
+<script
+   type="text/javascript"
+   src="static/functions.js"></script>
+
+</head>
+
+<body>
+<div id="server-page">
+	<span id='title'> Carena Minecraft Server</span>
+	<div id='status'></div>
+ 	<div id="stat-block">
+     		<div id='left-half'>
+     			<div class='stat-label'>CPU Usage:</div>
+     			<div id='cpu' class='bar'>        
+          			<div id='cpu_bar' class='progress'></div>
+     			</div>
+     			<div class='stat-label'>RAM Usage:</div>
+     			<div id='ram' class='bar'>
+          			<div id='ram_bar' class='progress'></div>
+     			</div>
+     			<div id='players'>
+          			<span id='player_header'>Online Players</span>
+          			<div id='player_data'></div>
+     			</div>
+     		</div>
+     		<div id='right-half'>
+     			<div class='stat-label' id='hdd_label'>HDD Space</div>
+     			<div id='hdd'></div>
+     		</div>
+  	</div>
+</div>
+<div id='control_panel'>
+   <button id='restart'>restart</button>
+</div>
+<div id='restartModal' class='modal'>
+        <div class='modal-content'>
+		<div class='modal-header'>
+			<span id='closeModal' class='close'>&times;</span>
+		<span id=modal-hd-text'>Please Enter Key</span>
+		</div>	 
+                <div id='restart_text'>
+                                
+                        	<input type="text" name="key" id="reset_key">
+                </div>
+	</div>
+</div>
+
+
+<script>
+serverStatus('#status')
+//player_list('#players')
+drawRAM()
+drawCPU()
+google.charts.setOnLoadCallback(drawHDD);
+
+var modal = document.getElementById('restartModal');
+var btn = document.getElementById('restart');
+var span = document.getElementById('closeModal');
+
+btn.onclick = function() {
+     modal.style.display = "block";
+}
+
+span.onclick = function(){
+     modal.style.display= "none";
+}
+
+window.onclick = function(event){
+	if (event.target == modal) {
+	    modal.style.display = "none";
+	}
+}
+
+document.getElementById("reset_key").addEventListener("keydown", function(e) {
+    if (!e) { var e = window.event; }
+    //e.preventDefault(); // sometimes useful
+    // Enter is pressed
+    if (e.keyCode == 13) { processKey(); }
+}, false);
+
+function processKey(){
+   var key = $("#reset_key").val();
+   $("#restart_text").fadeOut("slow");   
+   $.ajax({
+        'async': true,
+        'global': false,
+        'url': '/restart/' + key,
+        'dataType': "json",
+        'success': function (data) {
+            console.log(data["status"]);
+            var input = $("#reset_key");
+            if (data["status"] === "success"){
+		$("#restart_text").text(data['status'])
+                $("#restart_text").fadeIn("slow");
+            }else {
+            
+                $("#restart_text").fadeOut("slow", function(){
+              		   $("#restart_text").text(data['message']);
+			   $("#restart_text").fadeIn("slow");
+  		});  
+       		 setTimeout(function(){
+               		  $("#restart_text").fadeOut("slow",function(){
+      	    	    	  $("#restart_text").html(input);
+                       	 $("#restart_text").fadeIn("slow");
+                	  });
+            	},4000);
+            }
+        }
+    });
+
+
+}
+
+</script>
+</body>
+
+</html>
